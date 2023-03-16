@@ -41,7 +41,7 @@ public class FilmController {
         log.info("Получен PUT-запрос на обновление фильма с ID={}", film.getId());
         validateFilm(film);
         if (!films.containsKey(film.getId())) {
-            create(film);
+            throw new ValidationException("Фильм с id=" + film.getId() + " не найден.");
         } else {
             films.put(film.getId(), film);
         }

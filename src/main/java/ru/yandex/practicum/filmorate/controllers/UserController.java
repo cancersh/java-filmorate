@@ -41,7 +41,7 @@ public class UserController {
         log.info("Получен PUT-запрос на обновление пользователя с ID={}", user.getId());
         validateUser(user);
         if (!users.containsKey(user.getId())) {
-            create(user);
+            throw new ValidationException("Пользователь с id=" + user.getId() + " не найден.");
         } else {
             users.put(user.getId(), user);
         }
