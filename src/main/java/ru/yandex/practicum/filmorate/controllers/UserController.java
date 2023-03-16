@@ -10,21 +10,28 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final List<User> users = new ArrayList<>();
+    private final Map<Integer, User> users = new HashMap<>();
+    private int id = 0;
 
     @ResponseBody
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Получен POST-запрос на добавление пользователя");
         validateUser(user);
-        users.add(user);
+        if (users.containsKey(user.getId())) {
+            throw new ValidationException("Пользователь " + user.getEmail() + " уже зарегистрирован.");
+        } else {
+            user.setId(++id);
+            users.put(user.getId(), user);
+        }
         return user;
     }
 
@@ -33,13 +40,17 @@ public class UserController {
     public User update(@Valid @RequestBody User user) {
         log.info("Получен PUT-запрос на обновление пользователя с ID={}", user.getId());
         validateUser(user);
-        users.set(user.getId(), user);
+        if (!users.containsKey(user.getId())) {
+            create(user);
+        } else {
+            users.put(user.getId(), user);
+        }
         return user;
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return users;
+    public Collection<User> getUsers() {
+        return users.values();
     }
 
     public void validateUser(User user) throws ValidationException {

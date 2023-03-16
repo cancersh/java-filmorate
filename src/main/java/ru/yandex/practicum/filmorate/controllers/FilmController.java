@@ -10,21 +10,28 @@ import ru.yandex.practicum.filmorate.model.Film;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final List<Film> films = new ArrayList<>();
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @ResponseBody
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.info("Получен POST-запрос на добавление фильма");
         validateFilm(film);
-        films.add(film);
+        if (films.containsKey(film.getId())) {
+            throw new ValidationException("Фильм \"" + film.getName() + "\" уже есть в списке.");
+        } else {
+            int id = film.getId();
+            film.setId(++id);
+            films.put(film.getId(), film);
+        }
         return film;
     }
 
@@ -33,13 +40,17 @@ public class FilmController {
     public Film update(@Valid @RequestBody Film film) {
         log.info("Получен PUT-запрос на обновление фильма с ID={}", film.getId());
         validateFilm(film);
-        films.set(film.getId(), film);
+        if (!films.containsKey(film.getId())) {
+            create(film);
+        } else {
+            films.put(film.getId(), film);
+        }
         return film;
     }
 
     @GetMapping
-    public List<Film> getFilms() {
-        return films;
+    public Collection<Film> getFilms() {
+        return films.values();
     }
 
     public void validateFilm(Film film) throws ValidationException {
