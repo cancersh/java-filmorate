@@ -42,9 +42,8 @@ public class UserController {
         validateUser(user);
         if (!users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с id=" + user.getId() + " не найден.");
-        } else {
-            users.put(user.getId(), user);
         }
+        users.put(user.getId(), user);
         return user;
     }
 
@@ -53,24 +52,24 @@ public class UserController {
         return users.values();
     }
 
-    public void validateUser(User user) throws ValidationException {
+    private void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !(user.getEmail().contains("@"))) {
-            log.info("Получено исключение: Электронная почта не может быть пустой и должна содержать символ @.");
+            log.warn("Получено исключение: Электронная почта не может быть пустой и должна содержать символ @.");
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @.");
         }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.info("Получено исключение: Логин не может быть пустым и содержать пробелы.");
+            log.warn("Получено исключение: Логин не может быть пустым и содержать пробелы.");
             throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.info("Получено исключение: Дата рождения не может быть в будущем.");
+            log.warn("Получено исключение: Дата рождения не может быть в будущем.");
             throw new ValidationException("Дата рождения не может быть в будущем.");
         }
         if (user.getId() < 0) {
-            log.info("Получено исключение: id не может быть отрицательным.");
+            log.warn("Получено исключение: id={} не может быть отрицательным.", user.getId());
             throw new ValidationException("Id не может быть отрицательным.");
         }
     }

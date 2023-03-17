@@ -53,25 +53,25 @@ public class FilmController {
         return films.values();
     }
 
-    public void validateFilm(Film film) throws ValidationException {
+    private void validateFilm(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
-            log.info("Получено исключение: Название фильма не может быть пустым.");
+            log.warn("Получено исключение: Название фильма не может быть пустым.");
             throw new ValidationException("Название фильма не может быть пустым.");
         }
         if (film.getDescription().length() > 200) {
-            log.info("Получено исключение: Максимальная длина описания — 200 символов.");
+            log.warn("Получено исключение: Максимальная длина описания — 200 символов.");
             throw new ValidationException("Максимальная длина описания — 200 символов.");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.info("Получено исключение: Дата релиза фильма не может быть раньше 28 декабря 1895 года.");
+            log.warn("Получено исключение: Дата релиза фильма не может быть раньше 28 декабря 1895 года.");
             throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года.");
         }
         if (film.getDuration() <= 0) {
-            log.info("Получено исключение: Продолжительность фильма должна быть положительной.");
+            log.warn("Получено исключение: Продолжительность фильма должна быть положительной.");
             throw new ValidationException("Продолжительность фильма должна быть положительной.");
         }
         if (film.getId() < 0) {
-            log.info("Получено исключение: id не может быть отрицательным.");
+            log.warn("Получено исключение: id={} не может быть отрицательным.", film.getId());
             throw new ValidationException("Id не может быть отрицательным.");
         }
     }

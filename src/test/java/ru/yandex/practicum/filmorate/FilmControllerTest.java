@@ -14,6 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmControllerTest {
     private Film film;
     private FilmController filmController;
+    private static final String WRONG_DESCRIPTION = "Ложное описание ложное описание ложное описание " +
+            "ложное описание ложное описание ложное описание ложное описание ложное описание ложное описание " +
+            "ложное описание ложное описание ложное описание ложное описание";
+
 
     @BeforeEach
     protected void beforeEach() {
@@ -29,44 +33,42 @@ public class FilmControllerTest {
     @Test
     protected void validateNameNullTest() {
         film.setName(null);
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Название фильма не может быть пустым.", exception.getMessage());
     }
 
     @Test
     protected void validateBlankNameTest() {
         film.setName("");
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Название фильма не может быть пустым.", exception.getMessage());
     }
 
     @Test
     protected void validateDescriptionMore200Test() {
-        film.setDescription("Ложное описание ложное описание ложное описание ложное описание ложное описание " +
-                "ложное описание ложное описание ложное описание ложное описание ложное описание ложное описание " +
-                "ложное описание ложное описание");
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        film.setDescription(WRONG_DESCRIPTION);
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Максимальная длина описания — 200 символов.", exception.getMessage());
     }
 
     @Test
     protected void validateIdTest() {
         film.setId(-1);
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Id не может быть отрицательным.", exception.getMessage());
     }
 
     @Test
     protected void validateDurationTest() {
         film.setDuration(-189);
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
     }
 
     @Test
     protected void validateReleaseTest() {
         film.setReleaseDate(LocalDate.of(1672, 6,9));
-        Exception exception = assertThrows(ValidationException.class, () -> filmController.validateFilm(film));
+        Exception exception = assertThrows(ValidationException.class, () -> filmController.update(film));
         assertEquals("Дата релиза фильма не может быть раньше 28 декабря 1895 года.", exception.getMessage());
     }
 }
