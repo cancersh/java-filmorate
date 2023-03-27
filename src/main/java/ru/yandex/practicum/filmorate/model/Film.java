@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class Film {
 
     private int id;
-    @NotBlank(message = "Название фильма NOT может быть пустым.")
+    @NotBlank(message = "Название фильма не может быть пустым.")
     private String name;
     @Size(max = 200)
     private String description;
