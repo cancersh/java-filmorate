@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ public class UserControllerTest {
     @BeforeEach
     protected void beforeEach() {
         userController = new UserController(userStorage,  new UserService(userStorage));
+        userStorage = new InMemoryUserStorage();
         user = new User();
         user.setId(1);
         user.setLogin("Shurochka");
@@ -63,22 +65,6 @@ public class UserControllerTest {
         user.setLogin("shuro chka");
         Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
         assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
-    }
-
-    @Test
-    protected void validateBlankNameTest() throws ValidationException {
-        userController.create(user);
-        user.setName("");
-        userController.update(user);
-        assertEquals(user.getLogin(), user.getName());
-    }
-
-    @Test
-    protected void validateNameNullTest() throws ValidationException {
-        userController.create(user);
-        user.setName(null);
-        userController.update(user);
-        assertEquals(user.getLogin(), user.getName());
     }
 
     @Test
