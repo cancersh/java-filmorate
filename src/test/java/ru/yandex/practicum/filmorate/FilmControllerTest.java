@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -14,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmControllerTest {
     private Film film;
     private FilmController filmController;
+    private FilmStorage filmStorage;
+    private UserStorage userStorage;
     private static final String WRONG_DESCRIPTION = "Ложное описание ложное описание ложное описание " +
             "ложное описание ложное описание ложное описание ложное описание ложное описание ложное описание " +
             "ложное описание ложное описание ложное описание ложное описание";
@@ -21,7 +26,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     protected void beforeEach() {
-        filmController = new FilmController();
+        filmController = new FilmController(filmStorage, new FilmService(filmStorage, userStorage));
         film = new Film();
         film.setName("Зеленая миля");
         film.setDescription("В тюрьме для смертников появляется заключенный с божественным даром. " +
