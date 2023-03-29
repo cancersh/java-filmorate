@@ -13,8 +13,8 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    public final Map<Long, Film> films;
     private static long filmId;
+    public final Map<Long, Film> films;
 
     public InMemoryFilmStorage() {
         filmId = 0L;
