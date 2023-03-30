@@ -49,7 +49,8 @@ public class UserService {
 
         return user.getFriends().stream()
                 .map(userStorage::getUserById)
-                .collect(Collectors.toList());    }
+                .collect(Collectors.toList());
+    }
 
     // Получить список общих друзей
     public List<User> getCommonFriends(long firstUserId, long secondUserId) {
