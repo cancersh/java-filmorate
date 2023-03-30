@@ -32,15 +32,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User create(User user) throws ValidationException {
+    public User create(User user) {
         if (users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
-        } else {
-            user.setId(nextId());
-            users.put(user.getId(), user);
-            log.info("Пользователь с адресом электронной почты {} создан", user.getEmail());
         }
+
+        user.setId(nextId());
+        users.put(user.getId(), user);
+        log.info("Пользователь с адресом электронной почты {} создан", user.getEmail());
         return user;
     }
 
@@ -49,6 +49,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Пользователь с ID=" + user.getId() + " не найден!");
         }
+
         users.put(user.getId(), user);
         log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
         return user;
@@ -59,6 +60,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (!users.containsKey(userId)) {
             throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
         }
+
         return users.get(userId);
     }
 

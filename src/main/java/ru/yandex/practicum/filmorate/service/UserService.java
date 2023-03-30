@@ -1,25 +1,21 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     // Добавление в друзья
     public void addFriend(long userId, long friendId) {
@@ -50,26 +46,19 @@ public class UserService {
     // Получить список друзей
     public List<User> getFriends(long userId) {
         User user = userStorage.getUserById(userId);
-        List<User> friends = new ArrayList<>();
 
-        if (user != null) {
-            for (Long friend : user.getFriends()) {
-                friends.add(userStorage.getUserById(friend));
-            }
-        }
-        return friends;
-    }
+        return user.getFriends().stream()
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList());    }
 
     // Получить список общих друзей
     public List<User> getCommonFriends(long firstUserId, long secondUserId) {
         User firstUser = userStorage.getUserById(firstUserId);
         User secondUser = userStorage.getUserById(secondUserId);
-        List<User> commonFriends = null;
 
-        if ((firstUser != null) && (secondUser != null)) {
-            commonFriends = new ArrayList<>(getFriends(firstUserId));
-            commonFriends.retainAll(getFriends(secondUserId));
-        }
-        return commonFriends;
+        return firstUser.getFriends().stream()
+                .filter(secondUser.getFriends()::contains)
+                .map(userStorage::getUserById)
+                .collect(Collectors.toList());
     }
 }

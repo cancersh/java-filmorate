@@ -32,23 +32,24 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film create(Film film) throws ValidationException {
+    public Film create(Film film) {
         if (films.containsKey(film.getId())) {
             throw new ValidationException("Фильм \"" +
                     film.getName() + "\" уже есть в списке.");
-        } else {
-            film.setId(nextId());
-            films.put(film.getId(), film);
-            log.info("Фильм {} создан.", film.getName());
         }
+
+        film.setId(nextId());
+        films.put(film.getId(), film);
+        log.info("Фильм {} создан.", film.getName());
         return film;
     }
 
     @Override
-    public Film update(Film film) throws ValidationException {
+    public Film update(Film film) {
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм с ID=" + film.getId() + " не найден!");
         }
+
         films.put(film.getId(), film);
         log.info("Фильм {} обновлен.", film.getName());
         return film;
@@ -59,6 +60,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(filmId)) {
             throw new NotFoundException("Фильм с ID=" + filmId + " не найден!");
         }
+
         return films.get(filmId);
     }
 
@@ -67,6 +69,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(filmId)) {
             throw new ValidationException("Фильм с ID=" + filmId + " не найден!");
         }
+
         log.info("Фильм {} удален.", films.get(filmId).getName());
         return films.remove(filmId);
     }
