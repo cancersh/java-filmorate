@@ -3,7 +3,7 @@
 ## Модель базы данных представлена на ER-диаграмме
 
 ---
-![Модель базы данных](src/main/resources/DBModel-ER-Diagram.png)
+![Модель базы данных](src/main/resources/DBModel-ER-Diagra.png)
 
 ### Примеры запросов в базу данных
 
