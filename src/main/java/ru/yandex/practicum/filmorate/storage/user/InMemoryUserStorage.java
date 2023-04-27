@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private static long id;
+    private static Long id;
     public final Map<Long, User> users;
 
     public InMemoryUserStorage() {
@@ -21,7 +22,7 @@ public class InMemoryUserStorage implements UserStorage {
         users = new HashMap<>();
     }
 
-    private long nextId() {
+    private Long nextId() {
         return ++id;
     }
 
@@ -37,35 +38,42 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
         }
-
-        user.setId(nextId());
-        users.put(user.getId(), user);
-        log.info("Пользователь с адресом электронной почты {} создан", user.getEmail());
+        if (isValidateUser(user)) {
+            user.setId(nextId());
+            users.put(user.getId(), user);
+            log.info("Пользователь с адресом электронной почты {} создан", user.getEmail());
+        }
         return user;
     }
 
     @Override
     public User update(User user) {
+        if (user.getId() == null) {
+            throw new ValidationException("Передан пустой аргумент!");
+        }
         if (!users.containsKey(user.getId())) {
             throw new NotFoundException("Пользователь с ID=" + user.getId() + " не найден!");
         }
-
-        users.put(user.getId(), user);
-        log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
+        if (isValidateUser(user)) {
+            users.put(user.getId(), user);
+            log.info("Пользователь с адресом электронной почты {} обновлен", user.getEmail());
+        }
         return user;
     }
 
     @Override
-    public User getUserById(long userId) {
+    public User getUserById(Long userId) {
         if (!users.containsKey(userId)) {
             throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
         }
-
         return users.get(userId);
     }
 
     @Override
-    public User delete(long userId) {
+    public User delete(Long userId) {
+        if (userId == null) {
+            throw new ValidationException("Передан пустой аргумент!");
+        }
         if (!users.containsKey(userId)) {
             throw new ValidationException("Пользователь с ID=" + userId + " не найден!");
         }
@@ -74,5 +82,18 @@ public class InMemoryUserStorage implements UserStorage {
             user.getFriends().remove(userId);
         }
         return users.remove(userId);
+    }
+
+    private boolean isValidateUser(User user) {
+        if (!user.getEmail().contains("@")) {
+            throw new ValidationException("Некорректный e-mail пользователя: " + user.getEmail());
+        }
+        if ((user.getLogin().isEmpty()) || (user.getLogin().contains(" "))) {
+            throw new ValidationException("Некорректный логин пользователя: " + user.getLogin());
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Некорректная дата рождения пользователя: " + user.getBirthday());
+        }
+        return true;
     }
 }

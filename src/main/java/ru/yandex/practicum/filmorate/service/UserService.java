@@ -1,65 +1,65 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+    private FriendStorage friendStorage;
+
+    @Autowired
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendStorage friendStorage) {
+        this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
+    }
 
     // Добавление в друзья
-    public void addFriend(long userId, long friendId) {
+    public void addFriend(Long userId, Long friendId) {
         if (userId == friendId) {
             throw new ValidationException("Нельзя добавить самого себя в друзья!");
         }
-
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        friendStorage.addFriend(userId, friendId);
     }
 
     // Удаление из друзей
-    public void deleteFriend(long userId, long friendId) {
+    public void deleteFriend(Long userId, Long friendId) {
         if (userId == friendId) {
             throw new ValidationException("Нельзя удалить самого себя из друзей!");
         }
-
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId);
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        friendStorage.deleteFriend(userId, friendId);
     }
 
     // Получить список друзей
-    public List<User> getFriends(long userId) {
-        User user = userStorage.getUserById(userId);
-
-        return user.getFriends().stream()
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
+    public List<User> getFriends(Long userId) {
+        List<User> friends = new ArrayList<>();
+        if (userId != null) {
+            friends = friendStorage.getFriends(userId);
+        }
+        return friends;
     }
 
     // Получить список общих друзей
-    public List<User> getCommonFriends(long firstUserId, long secondUserId) {
+    public List<User> getCommonFriends(Long firstUserId, Long secondUserId) {
         User firstUser = userStorage.getUserById(firstUserId);
         User secondUser = userStorage.getUserById(secondUserId);
+        Set<User> intersection = null;
 
-        return firstUser.getFriends().stream()
-                .filter(secondUser.getFriends()::contains)
-                .map(userStorage::getUserById)
-                .collect(Collectors.toList());
+        if ((firstUser != null) && (secondUser != null)) {
+            intersection = new HashSet<>(friendStorage.getFriends(firstUserId));
+            intersection.retainAll(friendStorage.getFriends(secondUserId));
+        }
+        return new ArrayList<User>(intersection);
     }
 }
