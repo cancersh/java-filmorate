@@ -51,6 +51,7 @@ public class FriendDbStorageTest {
                 .birthday(LocalDate.of(1984, 9, 10))
                 .build();
     }
+
     @Test
     public void testAddFriend() {
         firstUser = userStorage.create(firstUser);
