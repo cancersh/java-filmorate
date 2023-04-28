@@ -47,10 +47,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (user.getId() == null) {
+        Long userId = user.getId();
+        if (userId == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
-        if (getUserById(user.getId()) != null) {
+        if (getUserById(userId) != null) {
             String sqlQuery = "UPDATE users SET " +
                     "email = ?, login = ?, name = ?, birthday = ? " +
                     "WHERE id = ?";
@@ -59,11 +60,11 @@ public class UserDbStorage implements UserStorage {
                     user.getLogin(),
                     user.getName(),
                     user.getBirthday(),
-                    user.getId());
-            log.info("Пользователь с ID={} успешно обновлен", user.getId());
+                    userId);
+            log.info("Пользователь с ID={} успешно обновлен", userId);
             return user;
         } else {
-            throw new NotFoundException("Пользователь с ID=" + user.getId() + " не найден!");
+            throw new NotFoundException("Пользователь с ID=" + userId + " не найден!");
         }
     }
 

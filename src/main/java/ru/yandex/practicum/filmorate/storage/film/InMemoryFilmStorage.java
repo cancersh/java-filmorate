@@ -14,6 +14,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
+    public static final int MAX_SIZE_DESCRIPTION = 200;
     private static Long filmId;
     public final Map<Long, Film> films;
 
@@ -87,7 +88,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (film.getName().isEmpty()) {
             throw new ValidationException("Название фильма не может быть пустым.");
         }
-        if ((film.getDescription().length()) > 200 || (film.getDescription().isEmpty())) {
+        if ((film.getDescription().length()) > MAX_SIZE_DESCRIPTION || (film.getDescription().isEmpty())) {
             throw new ValidationException("Описание фильма больше 200 символов или пустое: " + film.getDescription().length());
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {

@@ -16,7 +16,7 @@ import java.util.Set;
 
 @Data
 @Builder
-public class Film {
+public class    Film {
 
     private Long id;
     @NotBlank(message = "Название фильма не может быть пустым.")
@@ -46,12 +46,13 @@ public class Film {
     }
 
     public Map<String, Object> toMap() {
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", name);
-        values.put("description", description);
-        values.put("release_Date", releaseDate);
-        values.put("duration", duration);
-        values.put("rating_id", mpa.getId());
+        Map<String, Object> values = Map.of(
+                "name", name,
+                "description", description,
+                "release_Date", releaseDate,
+                "duration", duration,
+                "rating_id", mpa.getId()
+        );
         return values;
     }
 }
