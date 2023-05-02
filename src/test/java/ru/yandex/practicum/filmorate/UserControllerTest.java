@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controllers.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,70 +15,79 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 public class UserControllerTest {
+
     private User user;
     private UserController userController;
     private UserStorage userStorage;
 
-
     @BeforeEach
-    protected void beforeEach() {
-        userController = new UserController(userStorage,  new UserService(userStorage));
+    public void beforeEach() {
         userStorage = new InMemoryUserStorage();
-        user = new User();
-        user.setId(1);
-        user.setLogin("Shurochka");
-        user.setName("Alex Petrov");
-        user.setBirthday(LocalDate.of(1989, 7, 13));
-        user.setEmail("shurochka@yandex.ru");
+        userController = new UserController(userStorage, new UserService(userStorage, null));
+        user = User.builder()
+                .name("Name")
+                .login("Login")
+                .email("login@yandex.ru")
+                .birthday(LocalDate.of(1984, 7, 8))
+                .build();
     }
 
+    // проверка контроллера при корректных атрибутах пользователя
     @Test
-    protected void validateEmailNullTest() {
-        user.setEmail(null);
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", exception.getMessage());
+    public void shouldAddUserWhenAllAttributeCorrect() {
+        User user1 = userController.create(user);
+        assertEquals(user, user1, "Переданный и полученный пользователь должны совпадать");
+        assertEquals(1, userController.getUsers().size(), "В списке должен быть один пользователь");
     }
 
+    // проверка контроллера при "пустой" электронной почте пользователя
     @Test
-    protected void validateBlankEmailTest() {
+    public void shouldNoAddUserWhenUserEmailIsEmpty() {
         user.setEmail("");
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", exception.getMessage());
+        assertThrows(ValidationException.class, () -> userController.create(user));
+        assertEquals(0, userController.getUsers().size(), "Список пользователей должен быть пустым");
     }
 
+    // проверка контроллера, когда электронная почта не содержит символа @
     @Test
-    protected void validateEmailTest() {
-        user.setEmail("shurochka.yandex.ru");
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", exception.getMessage());
+    public void shouldNoAddUserWhenUserEmailIsNotContainsCommercialAt() {
+        user.setEmail("notemail.ru");
+        assertThrows(ValidationException.class, () -> userController.create(user));
+        assertEquals(0, userController.getUsers().size(), "Список пользователей должен быть пустым");
     }
 
+    // проверка контроллера, когда у пользователя пустой логин
     @Test
-    protected void validateLoginNullTest() {
-        user.setLogin(null);
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
+    public void shouldNoAddUserWhenUserLoginIsEmpty() {
+        user.setLogin("");
+        assertThrows(ValidationException.class, () -> userController.create(user));
+        assertEquals(0, userController.getUsers().size(), "Список пользователей должен быть пустым");
     }
 
+    // проверка контроллера, когда логин пользователя содержит пробелы
     @Test
-    protected void validateLoginTest() {
-        user.setLogin("shuro chka");
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
+    public void shouldNoAddUserWhenUserLoginIsContainsSpaces() {
+        user.setLogin("Max Power");
+        assertThrows(ValidationException.class, () -> userController.create(user));
+        assertEquals(0, userController.getUsers().size(), "Список пользователей должен быть пустым");
     }
 
+    // проверка контроллера, когда имя пользователя пустое
     @Test
-    protected void validateBirthdayTest() {
-        user.setBirthday(LocalDate.of(2089, 7, 13));
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Дата рождения не может быть в будущем.", exception.getMessage());
+    public void shouldAddUserWhenUserNameIsEmpty() {
+        user.setName("");
+        User user1 = userController.create(user);
+        assertTrue(user1.getName().equals(user.getLogin()), "Имя и логин пользователя должны совпадать");
+        assertEquals(1, userController.getUsers().size(), "В списке должен быть один пользователь");
     }
 
+    // проверка контроллера, когда дата рождения пользователя в будущем
     @Test
-    protected void validateIdTest() {
-        user.setId(-1);
-        Exception exception = assertThrows(ValidationException.class, () -> userController.update(user));
-        assertEquals("Id не может быть отрицательным.", exception.getMessage());
+    public void shouldAddUserWhenUserBirthdayInFuture() {
+        user.setBirthday(LocalDate.now().plusDays(1));
+        assertThrows(ValidationException.class, () -> userController.create(user));
+        assertEquals(0, userController.getUsers().size(), "Список пользователей должен быть пустым");
     }
 }

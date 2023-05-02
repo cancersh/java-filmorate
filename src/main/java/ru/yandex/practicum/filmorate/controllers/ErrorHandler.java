@@ -13,12 +13,6 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 @Slf4j
 public class ErrorHandler {
 
-/*
-    400 — если ошибка валидации: ValidationException;
-    404 — для всех ситуаций, если искомый объект не найден;
-    500 — если возникло исключение.
-*/
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestException(final ValidationException e) {
